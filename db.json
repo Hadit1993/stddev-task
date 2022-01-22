@@ -1,0 +1,21 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "password": "12345678"
+    }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "title": "Title 0",
+      "description": "Description of the post 0",
+      "category": "Category 1",
+      "website": "example.com"
+    }
+  ]
+}
