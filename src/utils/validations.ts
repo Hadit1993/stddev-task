@@ -21,4 +21,40 @@ const validatePassword = (password: string) => {
   }
 };
 
-export {validateEmail, validatePassword};
+const validateFirstname = (name: string) => {
+  if (name.trim().length === 0) {
+    return 'firstname is required';
+  }
+
+  if (name.length < 3) {
+    return 'firstname must be at least 3 characters long';
+  }
+};
+
+const validateLastname = (name: string) => {
+  if (name.trim().length === 0) {
+    return 'lastname is required';
+  }
+
+  if (name.length < 3) {
+    return 'lastname must be at least 3 characters long';
+  }
+};
+
+const validateConfirmPassword = (confirmPassword: string, password: string) => {
+  if (confirmPassword.trim().length === 0) {
+    return 'confirm password is required';
+  }
+
+  if (confirmPassword !== password) {
+    return 'confirm password do not match with password';
+  }
+};
+
+export {
+  validateEmail,
+  validatePassword,
+  validateFirstname,
+  validateLastname,
+  validateConfirmPassword,
+};

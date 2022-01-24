@@ -1,54 +1,69 @@
 import {Keyboard, StyleSheet, Text, View} from 'react-native';
 
-import React, {useState} from 'react';
+import React, {useEffect} from 'react';
 import Appbar from '../../components/appbar.component';
 import Input from '../../components/input.component';
 import Button from '../../components/button.component';
 import {useNavigation} from '@react-navigation/native';
 import NavigationRoutes from '../../utils/navigation/navigation.routes';
 import {validateEmail, validatePassword} from '../../utils/validations';
-
-interface SigninError {
-  email?: string;
-  password?: string;
-}
+import useGlobalState from '../../utils/hooks/useGlobalState';
+import useAuthActions from '../../store/actions/actionCreators/auth.action-creator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {AUTH_KEY} from '../../utils/constants';
 
 const SignInScreen = () => {
   const navigation = useNavigation<any>();
-  const [error, setError] = useState<SigninError>({});
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  const {
+    authenticatedUser,
+    signIn: {errors, isSubmitting, values},
+  } = useGlobalState(state => state.auth);
+
+  const {updateSigninError, updateSigninValue, signin} = useAuthActions();
+
+  useEffect(() => {
+    if (authenticatedUser) {
+      AsyncStorage.setItem(AUTH_KEY, authenticatedUser.id.toString());
+    }
+  }, [authenticatedUser]);
+
   return (
     <View style={styles.container}>
       <Appbar title="LOGIN" />
       <View style={styles.formContainer}>
         <Input
-          onChangeText={value => setEmail(value)}
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          onChangeText={value => updateSigninValue({email: value})}
           placeholder="Email"
           iconName="mail-outline"
-          error={error.email}
+          error={errors.email}
           returnKeyType="next"
-          enablesReturnKeyAutomatically
         />
         <Input
-          onChangeText={value => setPassword(value)}
+          onChangeText={value => updateSigninValue({password: value})}
           placeholder="Password"
           iconName="lock-outline"
           secureTextEntry
-          error={error.password}
+          error={errors.password}
         />
+
+        {!!errors.submit && (
+          <Text style={styles.submitError}>{errors.submit}</Text>
+        )}
         <Button
           label="Login"
+          isLoading={isSubmitting}
           onPress={() => {
-            const emailError = validateEmail(email);
-            const passwordError = validatePassword(password);
-            setError({
-              email: emailError,
-              password: passwordError,
-            });
+            const emailError = validateEmail(values.email);
+            const passwordError = validatePassword(values.password);
+
+            updateSigninError({email: emailError, password: passwordError});
 
             if (!emailError && !passwordError) {
               Keyboard.dismiss();
+              signin();
             }
           }}
         />
@@ -86,5 +101,10 @@ const styles = StyleSheet.create({
   highlightedCaption: {
     color: '#526CFF',
     fontWeight: '700',
+  },
+  submitError: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
 });
