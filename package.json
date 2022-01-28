@@ -7,17 +7,22 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "start-server": "json-server --watch db.json -p 3000 -d 2000 --host 192.168.1.106"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.16",
+    "@react-native-firebase/app": "^14.3.0",
+    "@react-native-firebase/firestore": "^14.3.0",
     "@react-navigation/bottom-tabs": "^6.0.9",
     "@react-navigation/native": "^6.0.6",
     "@react-navigation/native-stack": "^6.2.5",
     "global": "^4.4.0",
+    "javascript-time-ago": "^2.3.11",
     "json-server": "^0.17.0",
     "react": "17.0.2",
     "react-native": "0.66.4",
+    "react-native-gifted-chat": "^0.16.3",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.10.2",
     "react-native-vector-icons": "^9.0.0",

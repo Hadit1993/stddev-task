@@ -1,5 +1,5 @@
 import {Keyboard, ScrollView, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import React from 'react';
 import Appbar from '../../components/appbar.component';
 import Input from '../../components/input.component';
 import Button from '../../components/button.component';

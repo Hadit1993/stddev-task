@@ -13,6 +13,20 @@
       "email": "fgh@fgh.com",
       "password": "12345678",
       "id": 2
+    },
+    {
+      "first_name": "Abcd",
+      "last_name": "Efgh",
+      "email": "abcd@abcd.com",
+      "password": "12345678",
+      "id": 3
+    },
+    {
+      "first_name": "qwer",
+      "last_name": "poiu",
+      "email": "jhg@kljk.com",
+      "password": "123456789",
+      "id": 4
     }
   ],
   "posts": [
@@ -23,6 +37,22 @@
       "description": "Description of the post 0",
       "category": "Category 1",
       "website": "example.com"
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "title": "good title",
+      "description": "No better description",
+      "category": "Category 1",
+      "website": "example.com"
+    },
+    {
+      "title": "My beautiful Post",
+      "description": "this is another fancy post",
+      "category": "Category 4",
+      "website": "www.google.com",
+      "user_id": 2,
+      "id": 3
     }
   ]
 }

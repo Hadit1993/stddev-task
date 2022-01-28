@@ -4,7 +4,7 @@ import React, {useEffect} from 'react';
 import Appbar from '../../components/appbar.component';
 import Input from '../../components/input.component';
 import Button from '../../components/button.component';
-import {useNavigation} from '@react-navigation/native';
+import {CommonActions, useNavigation} from '@react-navigation/native';
 import NavigationRoutes from '../../utils/navigation/navigation.routes';
 import {validateEmail, validatePassword} from '../../utils/validations';
 import useGlobalState from '../../utils/hooks/useGlobalState';
@@ -25,8 +25,18 @@ const SignInScreen = () => {
   useEffect(() => {
     if (authenticatedUser) {
       AsyncStorage.setItem(AUTH_KEY, authenticatedUser.id.toString());
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: NavigationRoutes.main.name,
+            },
+          ],
+        }),
+      );
     }
-  }, [authenticatedUser]);
+  }, [authenticatedUser, navigation]);
 
   return (
     <View style={styles.container}>

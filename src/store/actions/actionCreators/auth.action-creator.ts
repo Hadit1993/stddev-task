@@ -1,12 +1,13 @@
-import {useCallback, useEffect, useMemo} from 'react';
+import {useCallback, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 import {dispatchAction} from '../..';
-import {BASE_URL} from '../../../utils/constants';
+import {AUTH_KEY, BASE_URL} from '../../../utils/constants';
 import User from '../../../utils/dtos/user.dto';
 import useGlobalState from '../../../utils/hooks/useGlobalState';
 import {AUTH_STATUS, SignInKey, SignUpKey} from '../../reducers/auth.reducer';
 import AuthActionType from '../actionTypes/auth.action-type';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
 
 const useAuthActions = () => {
   const dispatch = useDispatch();
@@ -105,6 +106,36 @@ const useAuthActions = () => {
     updateSigninError,
   ]);
 
+  const initConversations = useCallback(async (currentUser: User) => {
+    const result = await fetch(`${BASE_URL}/users`);
+    const users: [User] = await result.json();
+    const filteredUsers = users.filter(user => user.id !== currentUser?.id);
+    for (let user of filteredUsers) {
+      try {
+        const res = await firestore()
+          .collection('Conversations')
+          .add({
+            users: [
+              {
+                id: currentUser!.id,
+                name: `${currentUser?.first_name} ${currentUser?.last_name}`,
+                email: currentUser.email,
+              },
+              {
+                id: user.id,
+                name: `${user?.first_name} ${user?.last_name}`,
+                email: user.email,
+              },
+            ],
+            messages: [],
+          });
+        console.log({res});
+      } catch (error) {
+        console.error({error});
+      }
+    }
+  }, []);
+
   const signup = useCallback(async () => {
     onSignupStart();
     const data = {
@@ -115,7 +146,7 @@ const useAuthActions = () => {
     };
 
     try {
-      const result = await fetch('http://localhost:3000/users', {
+      const result = await fetch(`${BASE_URL}/users`, {
         body: JSON.stringify(data),
         method: 'POST',
         headers: {
@@ -123,13 +154,22 @@ const useAuthActions = () => {
         },
       });
 
-      onSignupSuccess();
-      return true;
+      if (result.status === 201) {
+        const createdUser: User = await result.json();
+        await initConversations(createdUser);
+
+        onSignupSuccess();
+        return true;
+      } else {
+        updateSignupError({submit: 'unknown error. try again later '});
+        return false;
+      }
     } catch (error) {
       updateSignupError({submit: 'unknown error. try again later '});
       return false;
     }
   }, [
+    initConversations,
     onSignupStart,
     onSignupSuccess,
     signUp.values.email,
@@ -139,7 +179,39 @@ const useAuthActions = () => {
     updateSignupError,
   ]);
 
-  const logout = useCallback(() => dispatcher({type: 'logout'}), [dispatcher]);
+  const checkAuthentication = useCallback(async () => {
+    try {
+      const userId = await AsyncStorage.getItem(AUTH_KEY);
+
+      if (userId) {
+        console.log({userId});
+        const result = await fetch(
+          `http://192.168.1.106:3000/users?id=${userId}`,
+        );
+        if (result.status === 200) {
+          const jsonResult: User[] = await result.json();
+          if (jsonResult.length > 0) {
+            updateAuthStatus('authenticated');
+            changeSignedInUser(jsonResult[0]);
+          } else {
+            throw new Error();
+          }
+        } else {
+          throw new Error();
+        }
+      } else {
+        throw new Error();
+      }
+    } catch (error) {
+      console.log({error});
+      updateAuthStatus('unauthenticated');
+    }
+  }, [changeSignedInUser, updateAuthStatus]);
+
+  const logout = useCallback(() => {
+    AsyncStorage.removeItem(AUTH_KEY);
+    return dispatcher({type: 'logout'});
+  }, [dispatcher]);
 
   return {
     changeSignedInUser,
@@ -151,6 +223,7 @@ const useAuthActions = () => {
     signin,
     logout,
     signup,
+    checkAuthentication,
   };
 };
 
